@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My AI Chat</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #212121;
+    color: #f5f5f5;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 260px;
+    background: #171717;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.new-chat {
+    padding: 13px;
+    border: 1px solid #555;
+    border-radius: 10px;
+    background: transparent;
+    color: white;
+    cursor: pointer;
+    text-align: left;
+    font-size: 15px;
+}
+
+.new-chat:hover {
+    background: #303030;
+}
+
+#history {
+    overflow-y: auto;
+    flex: 1;
+}
+
+.history-item {
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.history-item:hover,
+.history-item.active {
+    background: #303030;
+}
+
+.profile {
+    border-top: 1px solid #444;
+    padding-top: 15px;
+}
+
+/* Main area */
+.main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+header {
+    padding: 18px 24px;
+    border-bottom: 1px solid #333;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+#chat {
+    flex: 1;
+    overflow-y: auto;
+    padding: 25px 16px;
+}
+
+.welcome {
+    max-width: 700px;
+    margin: 12vh auto 0;
+    text-align: center;
+}
+
+.welcome h1 {
+    font-size: 32px;
+}
+
+.welcome p {
+    color: #aaa;
+}
+
+.message {
+    max-width: 760px;
+    margin: 18px auto;
+    padding: 15px 18px;
+    border-radius: 15px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.user {
+    background: #303030;
+}
+
+.ai {
+    background: #292929;
+}
+
+.role {
+    font-size: 12px;
+    color: #aaa;
+    margin-bottom: 7px;
+}
+
+/* Input area */
+.bottom {
+    padding: 12px 16px 20px;
+}
+
+.input-box {
+    max-width: 780px;
+    margin: auto;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    background: #303030;
+    border: 1px solid #555;
+    border-radius: 18px;
+    padding: 10px;
+}
+
+textarea {
+    flex: 1;
+    min-width: 0;
+    resize: none;
+    max-height: 140px;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: white;
+    font-size: 16px;
+    padding: 10px;
+    font-family: inherit;
+}
+
+#send {
+    border: none;
+    border-radius: 12px;
+    padding: 12px 16px;
+    background: white;
+    color: #111;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#send:hover {
+    background: #ddd;
+}
+
+#send:disabled {
+    opacity: 0.5;
+    cursor: wait;
+}
+
+.note {
+    color: #888;
+    font-size: 11px;
+    text-align: center;
+    margin-top: 10px;
+}
+
+@media (max-width: 650px) {
+    .sidebar {
+        width: 65px;
+        padding: 10px 6px;
+    }
+
+    .new-chat {
+        text-align: center;
+        padding: 12px 4px;
+        font-size: 12px;
+    }
+
+    .history-item,
+    .profile {
+        display: none;
+    }
+
+    header {
+        padding: 18px 14px;
+    }
+
+    .welcome h1 {
+        font-size: 25px;
+    }
+
+    #chat {
+        padding: 12px 8px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<aside class="sidebar">
+    <button class="new-chat" id="newChat">＋ New chat</button>
+    <div id="history"></div>
+    <div class="profile">👤 My AI</div>
+</aside>
+
+<main class="main">
+    <header>✦ My AI Assistant</header>
+
+    <section id="chat">
+        <div class="welcome" id="welcome">
+            <h1>What can I help with?</h1>
+            <p>Ask a question, learn something, or write code.</p>
+        </div>
+    </section>
+
+    <div class="bottom">
+        <form class="input-box" id="form">
+            <textarea id="prompt" rows="1"
+                placeholder="Message My AI..."
+                aria-label="Your message"></textarea>
+            <button id="send" type="submit">↑</button>
+        </form>
+        <div class="note">
+            Demo version · AI responses are simulated
+        </div>
+    </div>
+</main>
+
+<script>
+const chat = document.getElementById("chat");
+const form = document.getElementById("form");
+const promptInput = document.getElementById("prompt");
+const historyBox = document.getElementById("history");
+const welcome = document.getElementById("welcome");
+const sendButton = document.getElementById("send");
+
+let conversations = [];
+let currentId = null;
+
+function createConversation() {
+    const conversation = {
+        id: Date.now() + Math.random(),
+        title: "New chat",
+        messages: []
+    };
+
+    conversations.unshift(conversation);
+    currentId = conversation.id;
+    renderHistory();
+    renderChat();
+}
+
+function getCurrent() {
+    return conversations.find(c => c.id === currentId);
+}
+
+function renderHistory() {
+    historyBox.replaceChildren();
+
+    conversations.forEach(c => {
+        const item = document.createElement("div");
+        item.className = "history-item" +
+            (c.id === currentId ? " active" : "");
+        item.textContent = c.title;
+        item.title = c.title;
+
+        item.onclick = () => {
+            currentId = c.id;
+            renderHistory();
+            renderChat();
+        };
+
+        historyBox.appendChild(item);
+    });
+}
+
+function renderChat() {
+    chat.replaceChildren();
+
+    const conversation = getCurrent();
+
+    if (!conversation || conversation.messages.length === 0) {
+        const box = welcome.cloneNode(true);
+        box.style.display = "block";
+        chat.appendChild(box);
+        return;
+    }
+
+    conversation.messages.forEach(message => {
+        addMessageElement(message.role, message.content);
+    });
+}
+
+function addMessageElement(role, content) {
+    const div = document.createElement("div");
+    div.className = "message " + role;
+
+    const label = document.createElement("div");
+    label.className = "role";
+    label.textContent = role === "user" ? "You" : "My AI";
+
+    const text = document.createElement("div");
+    text.textContent = content;
+
+    div.append(label, text);
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+}
+
+function makeReply(text) {
+    const q = text.toLowerCase();
+
+    if (q.includes("hello") || q.includes("hi")) {
+        return "Hello! 👋 Welcome to My AI. How can I help you today?";
+    }
+
+    if (q.includes("your name")) {
+        return "I am My AI, your demo virtual assistant.";
+    }
+
+    if (q.includes("python")) {
+        return "Python is a popular programming language used in AI, data science, automation, and web development.\n\nWhat would you like to learn about Python?";
+    }
+
+    if (q.includes("html")) {
+        return "HTML is used to structure webpages. CSS styles the page, and JavaScript makes it interactive.";
+    }
+
+    if (q.includes("math") || q.includes("calculate")) {
+        return "I can help with maths in the connected AI version. This demo does not have a real AI reasoning engine yet.";
+    }
+
+    return "Thanks for your message! This is a demo chatbot, so I cannot generate a genuine AI answer yet.\n\nConnect a secure AI backend to enable real answers.";
+}
+
+form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const text = promptInput.value.trim();
+    if (!text || sendButton.disabled) return;
+
+    if (!currentId) createConversation();
+
+    const conversation = getCurrent();
+
+    conversation.messages.push({
+        role: "user",
+        content: text
+    });
+
+    if (conversation.title === "New chat") {
+        conversation.title = text.slice(0, 32);
+    }
+
+    promptInput.value = "";
+    promptInput.style.height = "auto";
+    renderHistory();
+    renderChat();
+
+    sendButton.disabled = true;
+
+    const loading = document.createElement("div");
+    loading.className = "message ai";
+    loading.textContent = "Thinking...";
+    chat.appendChild(loading);
+
+    // Demo response. Replace with a backend API request
+    // to connect a real AI model.
+    await new Promise(resolve => setTimeout(resolve, 600));
+
+    const reply = makeReply(text);
+
+    conversation.messages.push({
+        role: "assistant",
+        content: reply
+    });
+
+    sendButton.disabled = false;
+    renderChat();
+    promptInput.focus();
+});
+
+promptInput.addEventListener("input", () => {
+    promptInput.style.height = "auto";
+    promptInput.style.height =
+        Math.min(promptInput.scrollHeight, 140) + "px";
+});
+
+promptInput.addEventListener("keydown", event => {
+    if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        form.requestSubmit();
+    }
+});
+
+document.getElementById("newChat").addEventListener("click", () => {
+    createConversation();
+    promptInput.focus();
+});
+
+createConversation();
+</script>
+
+</body>
+</html>
