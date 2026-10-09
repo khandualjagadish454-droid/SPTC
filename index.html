@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Success Point Tuition Classes</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #172554;
+  --muted: #52627a;
+  --accent: #4f46e5;
+  --accent2: #0891b2;
+  --surface: #ffffff;
+  --line: #dbeafe;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: linear-gradient(145deg, #e0f2fe 0%, #eef2ff 48%, #f0fdfa 100%) !important;
+  color: var(--ink) !important;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.app {
+  max-width: 760px;
+  min-height: 100vh;
+  margin: auto;
+  background: rgba(255, 255, 255, 0.94) !important;
+  box-shadow: 0 12px 45px #4f46e51c !important;
+}
+
+/* Welcome Overlay */
+#welcome {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 20px;
+  color: #fff;
+  background: radial-gradient(circle at top left, #38bdf8 0%, transparent 38%), linear-gradient(135deg, #4338ca, #2563eb 58%, #0f766e) !important;
+  transition: opacity .45s;
+}
+#welcome.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+.welcome-card {
+  max-width: 420px;
+  width: 100%;
+  padding: 28px 22px;
+  border-radius: 28px;
+  background: #ffffff18;
+  border: 1px solid #ffffff45;
+  box-shadow: 0 24px 60px #17255444;
+  backdrop-filter: blur(12px);
+}
+.welcome-card .logo-box {
+  width: 140px;
+  height: 140px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px #17255425;
+  padding: 10px;
+}
+.welcome-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.welcome-card h2 { margin: 18px 0 5px; }
+.welcome-card p { font-style: italic; margin: 0 0 12px; }
+.subtagline { font-size: 13px; opacity: .9; margin-bottom: 20px !important; }
+.welcome-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* Header */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  color: #fff !important;
+  background: linear-gradient(120deg, #4338ca, #2563eb 55%, #0891b2) !important;
+  box-shadow: 0 5px 18px #1e40af22;
+}
+header .header-logo {
+  width: 52px;
+  height: 52px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+header img { width: 100%; height: 100%; object-fit: contain; }
+header h1 { font-size: 18px; margin: 0; }
+header p { font-size: 12px; margin: 3px 0 0; opacity: 0.9; }
+
+/* Pages & Cards */
+.page { display: none; padding: 20px 16px 90px; }
+.page.active { display: block; }
+.hero {
+  border-radius: 20px;
+  padding: 22px;
+  background: linear-gradient(125deg, #4f46e5, #2563eb 58%, #0891b2) !important;
+  color: #fff !important;
+  box-shadow: 0 10px 24px #2563eb25;
+}
+.hero h2 { margin: 0 0 8px; }
+.hero p { line-height: 1.5; margin: 0; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 12px; margin-top: 15px; }
+.card, .panel {
+  background: #fff !important;
+  color: #172554 !important;
+  border: 1px solid #dbeafe;
+  border-radius: 15px;
+  padding: 15px;
+  box-shadow: 0 5px 18px #1e40af12 !important;
+}
+.card h3 { margin: 0 0 6px; font-size: 16px; }
+.card p { color: #52627a !important; font-size: 13px; margin: 0; }
+
+/* Buttons & Inputs */
+.btn, button {
+  border: 0;
+  border-radius: 10px;
+  background: linear-gradient(120deg, #4f46e5, #2563eb) !important;
+  color: #fff !important;
+  padding: 11px 14px;
+  font-weight: 650;
+  cursor: pointer;
+  box-shadow: 0 3px 8px #2563eb20;
+}
+.field {
+  display: block;
+  width: 100%;
+  padding: 11px;
+  margin: 7px 0 12px;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 9px;
+  background: #f8fafc !important;
+  color: #172554 !important;
+}
+.label { font-size: 13px; font-weight: 650; }
+.notice { padding: 12px; border-radius: 10px; background: #ecfeff !important; color: #155e75 !important; border: 1px solid #a5f3fc; margin: 12px 0; }
+.empty { padding: 20px; text-align: center; color: #64748b !important; }
+
+/* Navigation */
+.nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  display: flex;
+  width: min(760px, 100%);
+  background: #fff !important;
+  border-top: 1px solid #dbeafe !important;
+}
+.nav button {
+  flex: 1;
+  background: #fff !important;
+  color: #475569 !important;
+  border-radius: 0;
+  padding: 10px 5px;
+  font-size: 13px;
+  box-shadow: none !important;
+}
+.nav button.active { background: #eef2ff !important; color: #4338ca !important; }
+.nav span { display: block; font-size: 18px; margin-bottom: 2px; }
+</style>
+</head>
+<body>
+
+<div id="welcome">
+  <div class="welcome-card">
+    <div class="logo-box">
+      <!-- Apne logo Image Ka Path Ya URL Yahan Rakhein -->
+      <img src="logo.png" alt="SPTC Logo" onerror="this.src='https://via.placeholder.com/150?text=SPTC+Logo'">
+    </div>
+    <h2>Welcome to Success Point</h2>
+    <p>The Key of Success</p>
+    <p class="subtagline">Surat's one and only trusted Odia tuition.</p>
+    <div class="welcome-actions">
+      <button onclick="dismissWelcome();go('studentLogin')">Student Login</button>
+      <button onclick="dismissWelcome();go('head')">Head Login</button>
+    </div>
+  </div>
+</div>
+
+<div class="app">
+  <header>
+    <div class="header-logo">
+      <!-- Header Logo Path -->
+      <img src="logo.png" alt="SPTC Header Logo" onerror="this.src='https://via.placeholder.com/100?text=SPTC'">
+    </div>
+    <div>
+      <h1>Success Point Tuition Classes</h1>
+      <p>Surat's trusted Odia medium learning center</p>
+    </div>
+  </header>
+
+  <nav class="nav">
+    <button id="navHome" onclick="go('home')" class="active"><span>🏠</span>Home</button>
+    <button id="navNotices" onclick="go('notices')"><span>📢</span>Notices</button>
+    <button id="navToppers" onclick="go('toppers')"><span>🏆</span>Toppers</button>
+    <button id="navStudent" onclick="go('studentLogin')"><span>🎓</span>Student</button>
+    <button id="navHead" onclick="go('head')"><span>⚙️</span>Admin</button>
+  </nav>
+
+  <main>
+    <section id="home" class="page active">
+      <div class="hero">
+        <h2>Success Point Tuition Classes</h2>
+        <p>Quality education for Odia medium students in Surat.</p>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <h3>Interactive Classes</h3>
+          <p>Comprehensive learning with skilled tutors.</p>
+        </div>
+        <div class="card">
+          <h3>Regular Tests</h3>
+          <p>Timely assessment to boost final exam performance.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="notices" class="page">
+      <h2>Notices & Announcements</h2>
+      <div class="notice">Welcome to the new academic session!</div>
+    </section>
+
+    <section id="toppers" class="page">
+      <h2>Our Hall of Fame</h2>
+      <div class="empty">Toppers list will appear here.</div>
+    </section>
+
+    <section id="studentLogin" class="page">
+      <h2>Student Login</h2>
+      <form onsubmit="event.preventDefault();">
+        <label class="label">Roll No / ID</label>
+        <input type="text" class="field" placeholder="Enter student ID">
+        <button type="submit" class="btn">Login</button>
+      </form>
+    </section>
+
+    <section id="head" class="page">
+      <h2>Head / Admin Section</h2>
+      <form onsubmit="event.preventDefault();">
+        <label class="label">Password</label>
+        <input type="password" class="field" placeholder="Enter Admin Password">
+        <button type="submit" class="btn">Access Panel</button>
+      </form>
+    </section>
+  </main>
+</div>
+
+<script>
+  function dismissWelcome() {
+    document.getElementById('welcome').classList.add('hidden');
+  }
+
+  function go(pageId) {
+    document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+    document.querySelectorAll('.nav button').forEach(btn => btn.classList.remove('active'));
+    
+    const targetPage = document.getElementById(pageId);
+    if(targetPage) targetPage.classList.add('active');
+    
+    const navBtn = document.getElementById('nav' + pageId.charAt(0).toUpperCase() + pageId.slice(1));
+    if(navBtn) navBtn.classList.add('active');
+  }
+</script>
+
+</body>
+</html>
