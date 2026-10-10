@@ -1,8 +1,3 @@
-"# SPTC_1" 
-"# sptc-2" 
-"# sptc-2" 
-"# SPTC_2026" 
-"# SUCCESS-POINT-TUTION-CLASS--2021" 
 "# sptc-website" 
 "# SPTC" 
 "# SPTC" 
